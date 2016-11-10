@@ -120,8 +120,12 @@ def getGeneralInformation(html, aggregate_dict={}):
 
     # Rank
     rank_text = soup.find("span", class_="numbers ranked").get_text()
-    rank_value = int(rank_regex.search(rank_text).group(1))
-    aggregate_dict["rank"] = rank_value
+    rank_match = rank_regex.search(rank_text)
+    if rank_match is None:
+        aggregate_dict["rank"] = None
+    else:
+        rank_value = int(rank_match.group(1))
+        aggregate_dict["rank"] = rank_value
 
     # Popularity
     popularity_text = soup.find("span", class_="numbers popularity").get_text()
@@ -134,8 +138,12 @@ def getGeneralInformation(html, aggregate_dict={}):
     aggregate_dict["members"] = members_value
 
     # Synoposis
-    synopsis_text = " ".join(soup.find("span", itemprop="description").strings)
-    aggregate_dict["synopsis"] = synopsis_text
+    synopsis_soup = soup.find("span", itemprop="description")
+    if synopsis_soup is None:
+        aggregate_dict["synopsis"] = None
+    else:
+        synopsis_text = " ".join(synopsis_soup.strings)
+        aggregate_dict["synopsis"] = synopsis_text
 
     # Statistics/Favorites (we have everything else)
     favorites_match = favorites_regex.search(html)
@@ -380,7 +388,7 @@ def parse_info_list(str):
 
 def example():
     print("Start")
-    url = "https://myanimelist.net/anime/23277/Saenai_Heroine_no_Sodatekata"
+    url = "https://myanimelist.net/anime/21521/Futabu"
     data = getAllDataFromUrl(url)
     print data
     print("Done")
