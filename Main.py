@@ -35,11 +35,12 @@ def grab_data(years, seasons):
                 with open(path_name, 'w') as f:
                     json.dump(dataset, f)
                 AnimePageFetcher.cooldown()
-            
-            error_file_name = fail_filename_format % group
-            error_path = os.path.join(directory, error_file_name)
-            with open(error_path, 'w') as f:
-                f.write("\n".join(fails))
+                
+            if len(fails) > 0:
+                error_file_name = fail_filename_format % group
+                error_path = os.path.join(directory, error_file_name)
+                with open(error_path, 'w') as f:
+                    f.write("\n".join(fails))
 
 def fix_fails(group):
     print "Starting to fix fails for group", group
@@ -65,10 +66,11 @@ def fix_fails(group):
         with open(path_name, 'w') as f:
             json.dump(dataset, f)
         AnimePageFetcher.cooldown()
-        
-    error_file_name = fail_filename_format % group
-    error_path = os.path.join(directory, error_file_name)
-    with open(error_path, 'w') as f:
-        f.write("\n".join(fails))
+    
+    if len(fails) > 0:
+        error_file_name = fail_filename_format % group
+        error_path = os.path.join(directory, error_file_name)
+        with open(error_path, 'w') as f:
+            f.write("\n".join(fails))
     
     print "Done fixing fails for group", group
