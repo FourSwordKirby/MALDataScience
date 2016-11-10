@@ -151,7 +151,7 @@ def getGeneralInformation(soup, aggregate_dict={}):
     # Info/Producers
     if "Producers" in text:
         producers_text = text.split("Producers:")[1].strip()
-        producers_list = producers_text.split(", ")
+        producers_list = producers_text.split(",")
         aggregate_dict["producers"] = producers_list
         info_soup = info_soup.find_next_sibling("div")
         text = info_soup.get_text()
@@ -161,7 +161,7 @@ def getGeneralInformation(soup, aggregate_dict={}):
     # Info/Licensors
     if "Licensors" in text:
         licensors_text = text.split("Licensors:")[1].strip()
-        licensors_list = licensors_text.split(", ")
+        licensors_list = licensors_text.split(",")
         aggregate_dict["licensors"] = licensors_list
         info_soup = info_soup.find_next_sibling("div")
         text = info_soup.get_text()
@@ -171,7 +171,7 @@ def getGeneralInformation(soup, aggregate_dict={}):
     # Info/Studios
     if "Studios" in text:
         studios_text = text.split("Studios:")[1].strip()
-        studios_list = studios_text.split(", ")
+        studios_list = studios_text.split(",")
         aggregate_dict["studios"] = studios_list
         info_soup = info_soup.find_next_sibling("div")
         text = info_soup.get_text()
@@ -190,7 +190,7 @@ def getGeneralInformation(soup, aggregate_dict={}):
     # Info/Genres
     if "Genres" in text:
         genres_text = text.split("Genres:")[1].strip()
-        genres_list = genres_text.split(", ")
+        genres_list = genres_text.split(",")
         aggregate_dict["genres"] = genres_list
         info_soup = info_soup.find_next_sibling("div")
         text = info_soup.get_text()
@@ -322,7 +322,7 @@ def getAllDataFromUrl(url):
     return data
 
 print("Start")
-url = "https://myanimelist.net/anime/34240/Shelter"
+url = "https://myanimelist.net/anime/23277/Saenai_Heroine_no_Sodatekata"
 data = getAllDataFromUrl(url)
 print data
 print("Done")
