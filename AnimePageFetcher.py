@@ -4,6 +4,7 @@ import sys
 from bs4 import BeautifulSoup
 import time
 from datetime import datetime
+import urllib
 
 rank_regex = re.compile(r"#(\d+)")
 number_regex = re.compile(r"[\d,]+")
@@ -248,6 +249,7 @@ def cooldown():
     time.sleep(COOLDOWN_IN_SECONDS)
 
 def get_html(url, verbose=False):
+    url = urllib.quote(url.encode("utf8"))
     if verbose: print "Making get request to", url
     r = requests.get(url)
     if r.status_code != requests.codes.ok:
@@ -325,7 +327,7 @@ def getAllDataFromUrl(url):
 
 def example():
     print("Start")
-    url = "https://myanimelist.net/anime/23277/Saenai_Heroine_no_Sodatekata"
+    url = "https://myanimelist.net/anime/27899/Tokyo_Ghoul_%E2%88%9AA"
     data = getAllDataFromUrl(url)
     print data
     print("Done")
