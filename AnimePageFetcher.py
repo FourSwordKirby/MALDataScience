@@ -6,33 +6,85 @@ import time
 from datetime import datetime
 import urllib
 
+# Finds instances of #24332
 rank_regex = re.compile(r"#(\d+)")
+
+# Finds instances of 342,543,212
 number_regex = re.compile(r"[\d,]+")
+
+# Finds instances of 4 hr.
 hours_regex = re.compile(r"(\d+) hr\.")
+
+# Finds instances of 34 min.
 min_regex = re.compile(r"(\d+) min\.")
+
+# Finds instances of 12 sec.
 sec_regex = re.compile(r"(\d+) sec\.")
 
-def prog(count, blockSize, totalSize):
-    percent = int(count*blockSize*100/totalSize)
-    sys.stdout.write("%2d%%, " % percent)
-    sys.stdout.flush()
+# Finds <h2>Information</h2> 
+info_regex = re.compile(r"<h2>\s*Information\s*</h2>")
 
-def dl(html):
-    soup = BeautifulSoup(html, 'html.parser')
-    file_name = soup.find("div", class_="fileName").get_text().strip()
-    js_script = soup.find("div", class_="download_link").text
-    match = re.search(r"http://.+?.mp3", js_script)
-    dl_link = match.group(0)
-    print("Downloading from", dl_link)
-    print("Saving as", file_name)
-    urllib.request.urlretrieve(dl_link, file_name, reporthook=prog)
-    print("\nDone download.")
+# Finds <h2>Statistics</h2>
+stats_regex = re.compile(r"<h2>\s*Statistics\s*</h2>")
+
+# Finds <h2>External Links</h2>
+stats_end_regex = re.compile(r'<div class="clearfix mauto mt16"')
+
+favorites_regex = re.compile(r"""<div>\s*<span class="dark_text">\s*Favorites:\s*</span>\s*([\d,]+)\s*</div>""")
+
 
 # Returns an int version of a comma seperated number in a string
 # Assumes that the string has a number in it.
-# e.g. "Members  \n      433,312"
+# e.g. extract_comma_number()"Members  \n      433,312") returns 433312 (int)
 def extract_comma_number(str):
     return int(number_regex.search(str).group(0).replace(",", ""))
+
+def get_safe_url(url):
+    url = url.encode("utf8")
+    slash_index = url.rfind("/")
+    url_title = url[slash_index+1:]
+    if "%" not in url_title:
+        url = url[:slash_index+1] + urllib.quote(url_title)
+    return url
+
+def get_html(url, verbose=False):
+    if verbose: sys.stdout.write("Making get request to " + url + " ... ")
+    r = requests.get(url)
+    if r.status_code != requests.codes.ok:
+        if verbose:
+            print "[ERROR] request.get returned non-OK status. Got:", r.status_code
+            with open("error_HTTP.log", 'w') as f:
+                f.write(r.text.encode("utf8"))
+        return None
+    else:
+        if verbose:
+            sys.stdout.write("OK.\n")
+            sys.stdout.flush()
+        return r.text.encode('utf8')
+
+def save_html(url, out_file, render_first=False):
+    html = ""
+    print "Making get request to", url
+    r = requests.get(url)
+    if r.status_code == requests.codes.ok:
+        print "OK"
+        html = r.text.encode('utf8')
+    else:
+        print "request.get returned non-OK status"
+        return None
+    print "Writing html to", out_file
+    print "Type is", type(html)
+    with open(out_file, 'w') as f:
+        soup = BeautifulSoup(html, 'html.parser')
+        html = soup.prettify()
+        f.write(html.encode("utf8"))
+        return html
+
+def load_html_from_file(file):
+    with open(file, 'r') as f:
+        html = f.read()
+        return html
+
 
 #these are the stats found on the stat page of an anime
 #Example: https://myanimelist.net/anime/30/Neon_Genesis_Evangelion/stats
@@ -52,7 +104,9 @@ def getCategoryAndIDFromUrl(url):
 #these are generic info like the producers and the source found in the
 #sidebar of an anime page
 #Example https://myanimelist.net/anime/30/Neon_Genesis_Evangelion
-def getGeneralInformation(soup, aggregate_dict={}):
+def getGeneralInformation(html, aggregate_dict={}):
+    soup = BeautifulSoup(html, 'html.parser')
+
     # Title
     title = soup.find("h1", class_="h1").get_text()
     aggregate_dict["title"] = title
@@ -79,128 +133,108 @@ def getGeneralInformation(soup, aggregate_dict={}):
     members_value = int(extract_comma_number(members_text))
     aggregate_dict["members"] = members_value
 
+    # Synoposis
+    synopsis_text = " ".join(soup.find("span", itemprop="description").strings)
+    aggregate_dict["synopsis"] = synopsis_text
+
+    # Statistics/Favorites (we have everything else)
+    favorites_match = favorites_regex.search(html)
+    favorites_text = favorites_match.group(1)
+    aggregate_dict["favorites"] = int(favorites_text.replace(",", ""))
+
     # Information section
-    info_soup = soup.find("h2", string=lambda s: s.strip() == "Information")
-    info_soup = info_soup.find_next_sibling("div")
-    text = info_soup.get_text()
+    info_dict = extract_info_section(html)
 
     # Info/Type
-    if "Type" in text:
-        type_text = text.split("Type:")[1].strip()
-        aggregate_dict["type"] = type_text
-        info_soup = info_soup.find_next_sibling("div")
-        text = info_soup.get_text()
-    else:
-        aggregate_dict["type"] = None
-
+    aggregate_dict["type"] = info_dict.get("Type")
 
     # Info/Episodes
-    if "Episodes" in text:
-        episodes_value = int(text.split("Episodes:")[1].strip())
+    if "Episodes" in info_dict:
+        episodes_value = 0
+        # Some anime pages have "Unknown" for number of episodes.
+        # 0 represents unknown, because no anime can truly have 0 episodes.
+        try:
+            episodes_value = int(info_dict["Episodes"])
+        except:
+            episodes_value = 0
         aggregate_dict["episodes"] = episodes_value
-        info_soup = info_soup.find_next_sibling("div")
-        text = info_soup.get_text()
     else:
         aggregate_dict["episodes"] = None
 
-
     # Info/Status
-    if "Status" in text:
-        status_text = text.split("Status:")[1].strip()
-        aggregate_dict["status"] = status_text
-        info_soup = info_soup.find_next_sibling("div")
-        text = info_soup.get_text()
-    else:
-        aggregate_dict["status"] = None
+    aggregate_dict["status"] = info_dict.get("Status")
 
     # Info/Aired
     aired_start = None
     aired_end = None
-    if "Aired" in text:
-        aired_text = info_soup.get_text().split("Aired:")[1].strip()
+    if "Aired" in info_dict:
+        aired_text = info_dict["Aired"]
+        # Some animes are aired on one date. Others run for some time period.
+        # Those that run over a duration have "to" in the text.
         if "to" in aired_text:
-            start_end_split = aired_text.split(" to ")
-            aired_start = datetime.strptime(start_end_split[0], "%b %d, %Y").isoformat()
-            aired_end = datetime.strptime(start_end_split[1], "%b %d, %Y").isoformat()
+            start_end_split = aired_text.split("to")
+            try:
+                aired_start = datetime.strptime(start_end_split[0].strip(), "%b %d, %Y").isoformat()
+            except:
+                print "[WARNING] Could not parse start date. Got:", start_end_split[0]
+                aired_start = None
+            
+            # Some currently running animes have ? for their end date.
+            if "?" in start_end_split[1]:
+                aired_end = None
+            else:
+                try:
+                    aired_end = datetime.strptime(start_end_split[1].strip(), "%b %d, %Y").isoformat()
+                except:
+                    print "[WARNING] Could not parse end date. Got:", start_end_split[1]
+                    aired_end = None
         else:
-            aired_start = datetime.strptime(aired_text, "%b %d, %Y").isoformat()
+            try:
+                aired_start = datetime.strptime(aired_text, "%b %d, %Y").isoformat()
+            except:
+                print "[WARNING] Could not parse start date. Got:", aired_text
+                aired_start = None
             aired_end = aired_start
-        info_soup = info_soup.find_next_sibling("div")
-        text = info_soup.get_text()
     aggregate_dict["aired_start"] = aired_start
     aggregate_dict["aired_end"] = aired_end
 
     # Info/Premiered
-    if "Premiered" in text: 
-        premiered_text = text.split("Premiered:")[1].strip()
-        aggregate_dict["premiered"] = premiered_text
-        info_soup = info_soup.find_next_sibling("div")
-        text = info_soup.get_text()
-    else:
-        aggregate_dict["premiered"] = None
+    aggregate_dict["premiered"] = info_dict.get("Premiered")
 
     # Info/Broadcast
-    if "Broadcast" in text:
-        broadcast_text = text.split("Broadcast:")[1].strip()
-        aggregate_dict["broadcast"] = broadcast_text
-        info_soup = info_soup.find_next_sibling("div")
-        text = info_soup.get_text()
-    else:
-        aggregate_dict["broadcast"] = None
+    aggregate_dict["broadcast"] = info_dict.get("Broadcast")
 
 
     # Info/Producers
-    if "Producers" in text:
-        producers_text = text.split("Producers:")[1].strip()
-        producers_list = producers_text.split(",")
-        aggregate_dict["producers"] = producers_list
-        info_soup = info_soup.find_next_sibling("div")
-        text = info_soup.get_text()
+    if "Producers" in info_dict:
+        aggregate_dict["producers"] = parse_info_list(info_dict["Producers"])
     else:
         aggregate_dict["producers"] = None
 
     # Info/Licensors
-    if "Licensors" in text:
-        licensors_text = text.split("Licensors:")[1].strip()
-        licensors_list = licensors_text.split(",")
-        aggregate_dict["licensors"] = licensors_list
-        info_soup = info_soup.find_next_sibling("div")
-        text = info_soup.get_text()
+    if "Licensors" in info_dict:
+        aggregate_dict["licensors"] = parse_info_list(info_dict["Licensors"]) 
     else:
         aggregate_dict["licensors"] = None
 
     # Info/Studios
-    if "Studios" in text:
-        studios_text = text.split("Studios:")[1].strip()
-        studios_list = studios_text.split(",")
-        aggregate_dict["studios"] = studios_list
-        info_soup = info_soup.find_next_sibling("div")
-        text = info_soup.get_text()
+    if "Studios" in info_dict:
+        aggregate_dict["studios"] = parse_info_list(info_dict["Studios"]) 
     else:
         aggregate_dict["studios"] = studios_list
 
     # Info/Source
-    if "Source" in text:
-        source_text = text.split("Source:")[1].strip()
-        aggregate_dict["source"] = source_text
-        info_soup = info_soup.find_next_sibling("div")
-        text = info_soup.get_text()
-    else:
-        aggregate_dict["source"] = None
+    aggregate_dict["source"] = info_dict.get("Source")
 
     # Info/Genres
-    if "Genres" in text:
-        genres_text = text.split("Genres:")[1].strip()
-        genres_list = genres_text.split(",")
-        aggregate_dict["genres"] = genres_list
-        info_soup = info_soup.find_next_sibling("div")
-        text = info_soup.get_text()
+    if "Genres" in info_dict:
+        aggregate_dict["genres"] = parse_info_list(info_dict["Genres"]) 
     else:
         aggregate_dict["genres"] = None
 
     # Info/Duration
-    if "Duration" in text:
-        duration_text = text.split("Duration:")[1].strip()
+    if "Duration" in info_dict:
+        duration_text = info_dict["Duration"]
         mins = 0.0
         # Hours
         match = hours_regex.search(duration_text)
@@ -215,14 +249,12 @@ def getGeneralInformation(soup, aggregate_dict={}):
         if match is not None:
             mins += float(match.group(1)) / 60.0
         aggregate_dict["duration"] = mins
-        info_soup = info_soup.find_next_sibling("div")
-        text = info_soup.get_text()
     else:
         aggregate_dict["duration"] = None
 
     # Info/Rating
-    if "Rating" in text:
-        rating_text = text.split("Rating:")[1].strip()
+    if "Rating" in info_dict:
+        rating_text = info_dict["Rating"]
         rating_shorthand = rating_text.split(" - ")[0].strip()
         aggregate_dict["rating"] = rating_shorthand
     else:
@@ -248,54 +280,6 @@ def cooldown():
     COOLDOWN_IN_SECONDS = 0.5
     time.sleep(COOLDOWN_IN_SECONDS)
 
-def get_safe_url(url):
-    url = url.encode("utf8")
-    slash_index = url.rfind("/")
-    url_title = url[slash_index+1:]
-    if "%" not in url_title:
-        url = url[:slash_index+1] + urllib.quote(url_title)
-    return url
-
-def get_html(url, verbose=False):
-    if verbose: print "Making get request to", url
-    r = requests.get(url)
-    if r.status_code != requests.codes.ok:
-        if verbose: print "request.get returned non-OK status"
-        print r.text
-        print r.status_code
-        return None
-    else:
-        if verbose: print "OK"
-        return r.text.encode('utf8')
-
-def save_html(url, out_file, render_first=False):
-    html = ""
-    print "Making get request to", url
-    r = requests.get(url)
-    if r.status_code == requests.codes.ok:
-        print "OK"
-        html = r.text.encode('utf8')
-    else:
-        print "request.get returned non-OK status"
-        return None
-    print "Writing html to", out_file
-    print "Type is", type(html)
-    with open(out_file, 'w') as f:
-        soup = BeautifulSoup(html, 'html.parser')
-        html = soup.prettify()
-        f.write(html.encode("utf8"))
-        return html
-
-def load_html_from_file(file):
-    with open(file, 'r') as f:
-        html = f.read()
-        return html
-
-def do():
-    with open("output.txt", 'r') as f:
-        html = f.read()
-        dl(html)
-        print("Completed")
 
 def bs_preprocess(html):
     """remove distracting whitespaces and newline characters"""
@@ -309,16 +293,30 @@ def bs_preprocess(html):
 
 # Returns dictionary with data
 def scrape_main_page(html, aggregate_data={}):
-    soup = BeautifulSoup(html, 'html.parser')
-    getGeneralInformation(soup, aggregate_data)
+    getGeneralInformation(html, aggregate_data)
     return aggregate_data
 
+
+# Returns pair (success, data)
+# If success if False, then some error occurred and data may be None or corrupted.
 def getAllDataFromUrl(url):
+    success = True
+
+    # Download the webpage
     url = get_safe_url(url)
     html = get_html(url, True)
+    retries = 0
+    while html is None:
+        print "Retrying after 5 seconds..."
+        time.sleep(5)
+        html = get_html(url, True)
+        retries += 1
+        if retries >= 3:
+            return (False, None)
     html = bs_preprocess(html)
-    # html = load_html_from_file("html_output.txt")
+
     data = {}
+    data["url"] = url
 
     # Page category and ID (i.e. ("anime", 345))
     # Used for primary keys
@@ -329,13 +327,62 @@ def getAllDataFromUrl(url):
     # Scrape data from the html of the main page
     try:
         scrape_main_page(html, data)
-    except:
-        print "[ERROR] Fetching data for '", data.get("title", url), "' ran into an issue."
-    return data
+    except Exception as e:
+        print "[ERROR] Fetching '", data.get("title", url), "' terminated early. Exception:", e.message
+        success = False
+    return (success, data)
+
+# Returns the data in the Information section as a dict.
+# The keys are the bolded text, and the values are everything that follows.
+# e.g. if d is the return dictionary, and the page had
+#           "Type:\n Music\n    Episodes:\n    1   \n Licensors: \n     None found, add some\n"
+#      you would get:
+#         d["Type"] = "Music"
+#         d["Episodes"] = "1"
+#         d["Licensors"] = "None found, add some"          
+def extract_info_section(html):
+    info_match = info_regex.search(html)
+    stat_match = stats_regex.search(html)
+    info_html = html[info_match.end():stat_match.start()]
+    info_soup = BeautifulSoup(info_html, 'html.parser')
+    info_list = [t.get_text().strip() for t in info_soup.find_all("div")]
+    info_dict = {}
+    for info in info_list:
+        try:
+            split_data = info.split(":", 1)
+            key, value = split_data[0].strip(), split_data[1].strip()
+            info_dict[key] = value
+        except:
+            print "[ERROR] Cannot split Information field. Got:", info
+    return info_dict
+
+def extract_stat_section(html):
+    start_index = stats_regex.search(html).end()
+    end_index = stats_end_regex.search(html).start()
+    subs = html[start_index:end_index]
+    stat_soup = BeautifulSoup(html[start_index:end_index], 'html.parser')
+    field_list = [t.get_text().strip() for t in stat_soup.find_all("div")]
+    field_dict = {}
+    for field in field_list:
+        try:
+            split_data = field.split(":", 1)
+            key, value = split_data[0].strip(), split_data[1].strip()
+            field_dict[key] = value
+        except:
+            print "[ERROR] Cannot split Statistics field. Got:", field
+    return field_dict
+
+def parse_info_list(str):
+    if "none found" in str.lower():
+        return []
+    else:
+        return str.split(",")
 
 def example():
     print("Start")
-    url = "https://myanimelist.net/anime/27899/Tokyo_Ghoul_%E2%88%9AA"
+    url = "https://myanimelist.net/anime/23277/Saenai_Heroine_no_Sodatekata"
     data = getAllDataFromUrl(url)
     print data
     print("Done")
+
+example()

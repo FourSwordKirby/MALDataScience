@@ -1,7 +1,7 @@
-import SeasonLinkScraper
-import AnimePageFetcher
 import os
 import json
+import AnimePageFetcher
+import SeasonLinkScraper
 
 years = [2014]#, 2013, 2014, 2015]
 seasons = ["winter", "fall", "summer", "spring"]
