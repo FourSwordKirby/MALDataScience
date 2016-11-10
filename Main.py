@@ -15,7 +15,11 @@ for year in years:
             os.makedirs(directory)
 
         animeURLS = SeasonLinkScraper.get_season_anime(year, season)
+        AnimePageFetcher.cooldown()
         for url in animeURLS:
             dataset = AnimePageFetcher.getAllDataFromUrl(url)
-            json.dumps(dataset, dataset["title"])
+            file_name = str(dataset["id"]) + ".json"
+            path_name = os.path.join(directory, file_name)
+            with open(path_name, 'w') as f:
+                json.dump(dataset, f)
             AnimePageFetcher.cooldown()

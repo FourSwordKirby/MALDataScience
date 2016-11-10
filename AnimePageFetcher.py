@@ -248,8 +248,15 @@ def cooldown():
     COOLDOWN_IN_SECONDS = 0.5
     time.sleep(COOLDOWN_IN_SECONDS)
 
+def get_safe_url(url):
+    url = url.encode("utf8")
+    slash_index = url.rfind("/")
+    url_title = url[slash_index+1:]
+    if "%" not in url_title:
+        url = url[:slash_index+1] + urllib.quote(url_title)
+    return url
+
 def get_html(url, verbose=False):
-    url = urllib.quote(url.encode("utf8"))
     if verbose: print "Making get request to", url
     r = requests.get(url)
     if r.status_code != requests.codes.ok:
@@ -307,6 +314,7 @@ def scrape_main_page(html, aggregate_data={}):
     return aggregate_data
 
 def getAllDataFromUrl(url):
+    url = get_safe_url(url)
     html = get_html(url, True)
     html = bs_preprocess(html)
     # html = load_html_from_file("html_output.txt")

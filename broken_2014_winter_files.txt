@@ -1,0 +1,128 @@
+Youkai Watch
+Nyanfuru
+Pic-lele
+Naruto Shipudden
+One Piece
+Detective Conan
+Crayon Shin-Chan
+[ERROR] Fetching data for ' Furusato Saisei: Nihon no Mukashibanashi ' ran into an issue.
+[ERROR] Fetching data for ' Doraemon (2005) ' ran into an issue.
+[ERROR] Fetching data for ' Nintama Rantarou ' ran into an issue.
+[ERROR] Fetching data for ' Sazae-san ' ran into an issue.
+[ERROR] Fetching data for ' Domo-kun ' ran into an issue.
+[ERROR] Fetching data for ' Chibi Maruko-chan (1995) ' ran into an issue.
+[ERROR] Fetching data for ' Sore Ike! Anpanman ' ran into an issue.
+[ERROR] Fetching data for ' Ojarumaru ' ran into an issue.
+
+
+Making get request to https://myanimelist.net/anime/9947/Lan_Mao
+OK
+[ERROR] Fetching data for ' Lan Mao ' ran into an issue.
+Making get request to https://myanimelist.net/anime/10797/Kayoe_Chuugaku
+OK
+[ERROR] Fetching data for ' Kayoe! Chuugaku ' ran into an issue.
+Making get request to https://myanimelist.net/anime/8244/Keshikasu-kun
+OK
+[ERROR] Fetching data for ' Keshikasu-kun ' ran into an issue.
+Making get request to https://myanimelist.net/anime/10506/Shiawase_Haitatsu_Taneko
+OK
+[ERROR] Fetching data for ' Shiawase Haitatsu Taneko ' ran into an issue.
+Making get request to https://myanimelist.net/anime/31965/Ba_La_La_Xiao_Mo_Xian_Zhi__Qiji_Wubu
+OK
+[ERROR] Fetching data for ' Ba La La Xiao Mo Xian Zhi: Qiji Wubu ' ran into an issue.
+Making get request to https://myanimelist.net/anime/19445/Tetsujin_28-gou_Gao
+OK
+Making get request to https://myanimelist.net/anime/30151/Kamiusagi_Rope__Warau_Asa_ni_wa_Fukuraitaru_tte_Maji_ssuka
+OK
+[ERROR] Fetching data for ' Kamiusagi Rope: Warau Asa ni wa Fukuraitaru tte Maji ssuka!? ' ran into an issue.
+Making get request to https://myanimelist.net/anime/13463/Panda_no_Taputapu
+OK
+[ERROR] Fetching data for ' Panda no Taputapu ' ran into an issue.
+Making get request to https://myanimelist.net/anime/13457/Tomodachi_8-nin
+OK
+[ERROR] Fetching data for ' Tomodachi 8-nin ' ran into an issue.
+Making get request to https://myanimelist.net/anime/18241/Himitsukessha_Taka_no_Tsume_MAX
+OK
+Making get request to https://myanimelist.net/anime/24775/Koishite_Namashi-chan
+OK
+[ERROR] Fetching data for ' Koishite!! Namashi-chan ' ran into an issue.
+Making get request to https://myanimelist.net/anime/22585/Nukko
+OK
+[ERROR] Fetching data for ' Nukko. ' ran into an issue.
+Making get request to https://myanimelist.net/anime/22669/Gohan_Kaijuu_Pap
+OK
+[ERROR] Fetching data for ' Gohan Kaijuu Pap ' ran into an issue.
+
+Making get request to https://myanimelist.net/anime/22585/Nukko
+OK
+[ERROR] Fetching data for ' Nukko. ' ran into an issue.
+Making get request to https://myanimelist.net/anime/22669/Gohan_Kaijuu_Pap
+OK
+[ERROR] Fetching data for ' Gohan Kaijuu Pap ' ran into an issue.
+Making get request to https://myanimelist.net/anime/18941/Shimajirou_no_Wow
+OK
+[ERROR] Fetching data for ' Shimajirou no Wow! ' ran into an issue.
+Making get request to https://myanimelist.net/anime/16908/Ganbare_Oden-kun
+OK
+Making get request to https://myanimelist.net/anime/29399/Ousama_Monogatari
+OK
+[ERROR] Fetching data for ' Ousama Monogatari ' ran into an issue.
+Making get request to https://myanimelist.net/anime/33538/Shima_Kousaku_no_Asia_Risshi-den
+OK
+Making get request to https://myanimelist.net/anime/30119/Yowamushi_Monsters
+OK
+[ERROR] Fetching data for ' Yowamushi Monsters ' ran into an issue.
+Making get request to https://myanimelist.net/anime/32842/Panpaka_Pants
+OK
+[ERROR] Fetching data for ' Panpaka Pants ' ran into an issue.
+
+
+OK
+[ERROR] Fetching data for ' Oni Chichi 2: Revenge ' ran into an issue.
+Making get request to https://myanimelist.net/anime/13843/Wild_Adapter
+OK
+Making get request to https://myanimelist.net/anime/22069/Swing_Out_Sisters_2014
+OK
+[ERROR] Fetching data for ' Swing Out Sisters (2014) ' ran into an issue.
+Making get request to https://myanimelist.net/anime/21075/Hetalia__The_Beautiful_World_Extra_Disc
+OK
+Making get request to https://myanimelist.net/anime/21751/Okusama_wa_Moto_Yariman
+OK
+[ERROR] Fetching data for ' Okusama wa Moto Yariman ' ran into an issue.
+Making get request to https://myanimelist.net/anime/21597/Yabai_Fukushuu_Yami_Site
+OK
+[ERROR] Fetching data for ' Yabai! Fukushuu Yami Site ' ran into an issue.
+Making get request to https://myanimelist.net/anime/21649/Mitsuwano
+OK
+Making get request to https://myanimelist.net/anime/21363/Tokubetsu_Jugyou_3_SLG_The_Animation
+OK
+[ERROR] Fetching data for ' Tokubetsu Jugyou 3 SLG The Animation ' ran into an issue.
+Making get request to https://myanimelist.net/anime/21513/Imako_System
+OK
+[ERROR] Fetching data for ' Imako System ' ran into an issue.
+Making get request to https://myanimelist.net/anime/20589/Bikyaku_Seido_Kaichou_Ai
+OK
+[ERROR] Fetching data for ' Bikyaku Seido Kaichou Ai ' ran into an issue.
+Making get request to https://myanimelist.net/anime/22039/Mou_Hasamazu_ni_wa_Irarenai%E2%99%A5__Hoshi_ni_Onegai_Shitara_Konnani_Okkiku_Nacchatta
+OK
+[ERROR] Fetching data for ' Mou Hasamazu ni wa Irarenai?: Hoshi ni Onegai Shitara Konnani Okkiku Nacchatta! ' ran into an issue.
+Making get request to https://myanimelist.net/anime/21059/Oppai_Infinity%E2%88%9E_The_Animation
+OK
+[ERROR] Fetching data for ' Oppai Infinity8! The Animation ' ran into an issue.
+Making get request to https://myanimelist.net/anime/21393/Shiiba-san_no_Ura_no_Kao_with_Imouto_Lip
+OK
+[ERROR] Fetching data for ' Shiiba-san no Ura no Kao. with Imouto Lip ' ran into an issue.
+Making get request to https://myanimelist.net/anime/22081/Cosplay_Rakuen
+OK
+[ERROR] Fetching data for ' Cosplay Rakuen ' ran into an issue.
+Making get request to https://myanimelist.net/anime/21599/Fight_Ippatsu_Juuden-chan_OVA
+OKMaking get request to https://myanimelist.net/anime/23479/Itadaki_Seieki%E2%99%A5_Special
+OK
+[ERROR] Fetching data for ' Itadaki! Seieki? Special ' ran into an issue.
+Making get request to https://myanimelist.net/anime/27907/Gundam_Build_Fighters_Specials
+
+OK
+Making get request to https://myanimelist.net/anime/31424/Inyouchuu_Etsu_Special
+OK
+[ERROR] Fetching data for ' Inyouchuu Etsu Special ' ran into an issue.
+Making get request to https://myanimelist.net/anime/22985/Hipira-kun_Special
