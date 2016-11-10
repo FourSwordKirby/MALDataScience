@@ -244,7 +244,7 @@ def getRelatedTitles(html):
     return
 
 def cooldown():
-    COOLDOWN_IN_SECONDS = 0.25
+    COOLDOWN_IN_SECONDS = 0.5
     time.sleep(COOLDOWN_IN_SECONDS)
 
 def get_html(url, verbose=False):
@@ -252,6 +252,8 @@ def get_html(url, verbose=False):
     r = requests.get(url)
     if r.status_code != requests.codes.ok:
         if verbose: print "request.get returned non-OK status"
+        print r.text
+        print r.status_code
         return None
     else:
         if verbose: print "OK"
