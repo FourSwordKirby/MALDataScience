@@ -181,27 +181,14 @@ def getGeneralInformation(html, aggregate_dict={}):
         # Those that run over a duration have "to" in the text.
         if "to" in aired_text:
             start_end_split = aired_text.split("to")
-            try:
-                aired_start = datetime.strptime(start_end_split[0].strip(), "%b %d, %Y").isoformat()
-            except:
-                print "[WARNING] Could not parse start date. Got:", start_end_split[0]
-                aired_start = None
-            
+            aired_start = parse_date(start_end_split[0])
             # Some currently running animes have ? for their end date.
             if "?" in start_end_split[1]:
                 aired_end = None
             else:
-                try:
-                    aired_end = datetime.strptime(start_end_split[1].strip(), "%b %d, %Y").isoformat()
-                except:
-                    print "[WARNING] Could not parse end date. Got:", start_end_split[1]
-                    aired_end = None
+                aired_end = parse_date(start_end_split[1])
         else:
-            try:
-                aired_start = datetime.strptime(aired_text, "%b %d, %Y").isoformat()
-            except:
-                print "[WARNING] Could not parse start date. Got:", aired_text
-                aired_start = None
+            aired_start = parse_date(aired_text)
             aired_end = aired_start
     aggregate_dict["aired_start"] = aired_start
     aggregate_dict["aired_end"] = aired_end
@@ -386,11 +373,28 @@ def parse_info_list(str):
     else:
         return str.split(",")
 
+def parse_date(s):
+    try:
+        return datetime.strptime(s.strip(), "%b %d, %Y").isoformat()
+    except:
+        print "[WARNING] Could not parse date normally. Got:", s
+    try:
+        d = datetime.strptime(s.strip(), "%b, %Y").isoformat()
+        print "[WARNING] Using alternative:", d
+        return d
+    except:
+        print "[WARNING] Could not get month, year format."
+    try:
+        d = datetime.strptime(s.strip(), "%Y").isoformat()
+        print "[WARNING] Using alternative:", d
+        return d
+    except:
+        print "[WARNING] Could not parse date at all. Returning None."
+        return d
+
 def example():
     print("Start")
-    url = "https://myanimelist.net/anime/21521/Futabu"
+    url = "https://myanimelist.net/anime/9947/Lan_Mao"
     data = getAllDataFromUrl(url)
     print data
     print("Done")
-
-example()
