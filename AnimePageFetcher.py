@@ -119,10 +119,10 @@ def getGeneralInformation(soup, aggregate_dict={}):
         aired_text = info_soup.get_text().split("Aired:")[1].strip()
         if "to" in aired_text:
             start_end_split = aired_text.split(" to ")
-            aired_start = datetime.strptime(start_end_split[0], "%b %d, %Y")
-            aired_end = datetime.strptime(start_end_split[1], "%b %d, %Y")
+            aired_start = datetime.strptime(start_end_split[0], "%b %d, %Y").isoformat()
+            aired_end = datetime.strptime(start_end_split[1], "%b %d, %Y").isoformat()
         else:
-            aired_start = datetime.strptime(aired_text, "%b %d, %Y")
+            aired_start = datetime.strptime(aired_text, "%b %d, %Y").isoformat()
             aired_end = aired_start
         info_soup = info_soup.find_next_sibling("div")
         text = info_soup.get_text()
@@ -321,8 +321,9 @@ def getAllDataFromUrl(url):
         print "[ERROR] Fetching data for '", data.get("title", url), "' ran into an issue."
     return data
 
-print("Start")
-url = "https://myanimelist.net/anime/23277/Saenai_Heroine_no_Sodatekata"
-data = getAllDataFromUrl(url)
-print data
-print("Done")
+def example():
+    print("Start")
+    url = "https://myanimelist.net/anime/23277/Saenai_Heroine_no_Sodatekata"
+    data = getAllDataFromUrl(url)
+    print data
+    print("Done")
