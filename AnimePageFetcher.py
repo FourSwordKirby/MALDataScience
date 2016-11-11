@@ -304,16 +304,19 @@ def getAllDataFromUrl(url):
     data = {}
     data["url"] = url
 
-    html = get_html(url, True)
-    retries = 0
-    while html is None:
-        print "Retrying after 5 seconds..."
-        time.sleep(5)
+    try:
         html = get_html(url, True)
-        retries += 1
-        if retries >= 3:
-            return (False, data)
-    html = bs_preprocess(html)
+        retries = 0
+        while html is None:
+            print "Retrying after 5 seconds..."
+            time.sleep(5)
+            html = get_html(url, True)
+            retries += 1
+            if retries >= 3:
+                return (False, data)
+        html = bs_preprocess(html)
+    except:
+        return (False, data)
 
     # Page category and ID (i.e. ("anime", 345))
     # Used for primary keys
@@ -396,9 +399,9 @@ def parse_date(s):
 
 def example():
     print("Start")
-    url = "https://myanimelist.net/anime/34259/Chotto_Ugoku_Futeneko"
+    url = "https://myanimelist.net/anime/13391/Rakuen_Tsuihou__Expelled_from_Paradise"
     data = getAllDataFromUrl(url)
-    print data[1].keys()
+    print data[1]
     print("Done")
 
 needed_keys = set([
