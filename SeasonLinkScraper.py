@@ -5,19 +5,31 @@ import sys
 from bs4 import BeautifulSoup
 
 def get_html(url, verbose=False):
-    if verbose: print "Making get request to", url
+    if verbose: sys.stdout.write("Making get request to " + url + " ... ")
     r = requests.get(url)
     if r.status_code != requests.codes.ok:
-        if verbose: print "request.get returned non-OK status"
+        if verbose:
+            print "[ERROR] request.get returned non-OK status. Got:", r.status_code
         return None
     else:
-        if verbose: print "OK"
+        if verbose:
+            sys.stdout.write("OK.\n")
+            sys.stdout.flush()
         return r.text.encode('utf8')
-
 
 def get_season_anime(year, season, out_file=""):
     base_url = "https://myanimelist.net/anime/season/"
-    html = get_html(base_url + str(year) + "/" + season.lower())
+    url = base_url + str(year) + "/" + season.lower()
+    html = get_html(url)
+    retries = 0
+    while html is None:
+        print "Retrying after", (retries+1) * 5, "seconds..."
+        time.sleep((retries+1) * 5)
+        html = get_html(url, True)
+        retries += 1
+        if retries >= 10:
+            print "Cannot get seasonal data for", season, year
+            return []
     soup = BeautifulSoup(html, 'html.parser')
     anime_titles = soup.findAll("a", class_="link-title")
 

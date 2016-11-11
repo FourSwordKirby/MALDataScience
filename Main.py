@@ -135,4 +135,3 @@ if len(sys.argv) > 1:
     grab_data([int(i) for i in sys.argv[1:]])
 else:
     print "Use: python Main.py <year1> <year2>"
-    
