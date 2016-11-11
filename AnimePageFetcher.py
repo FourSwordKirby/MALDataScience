@@ -112,7 +112,11 @@ def getGeneralInformation(html, aggregate_dict={}):
     # Score
     score_tag = soup.find("div", class_="fl-l score")
     score_users = extract_comma_number(score_tag["data-user"])
-    score_value = float(score_tag.get_text().strip())
+    score_value = 0.0
+    try:
+        score_value = float(score_tag.get_text().strip())
+    except:
+        score_value = 0.0
     aggregate_dict["score_users"] = score_users
     aggregate_dict["score"] = score_value
 
@@ -295,8 +299,11 @@ def scrape_main_page(html, aggregate_data={}):
 def getAllDataFromUrl(url):
     success = True
 
-    # Download the webpage
+    # Make URL
     url = get_safe_url(url)
+    data = {}
+    data["url"] = url
+
     html = get_html(url, True)
     retries = 0
     while html is None:
@@ -305,11 +312,8 @@ def getAllDataFromUrl(url):
         html = get_html(url, True)
         retries += 1
         if retries >= 3:
-            return (False, None)
+            return (False, data)
     html = bs_preprocess(html)
-
-    data = {}
-    data["url"] = url
 
     # Page category and ID (i.e. ("anime", 345))
     # Used for primary keys
@@ -392,7 +396,38 @@ def parse_date(s):
 
 def example():
     print("Start")
-    url = "https://myanimelist.net/anime/9947/Lan_Mao"
+    url = "https://myanimelist.net/anime/34259/Chotto_Ugoku_Futeneko"
     data = getAllDataFromUrl(url)
-    print data
+    print data[1].keys()
     print("Done")
+
+needed_keys = set([
+    'rating',
+    'studios',
+    'members',
+    'rank',
+    'episodes',
+    'duration',
+    'id',
+    'category',
+    'genres',
+    'title',
+    'source',
+    'score',
+    'type',
+    'status',
+    'broadcast',
+    'favorites',
+    'producers',
+    'licensors',
+    'url',
+    'popularity',
+    'score_users',
+    'premiered',
+    'aired_end',
+    'aired_start',
+    'synopsis'
+])
+
+def validate(data):
+    return needed_keys.issubset(set(data.keys()))
