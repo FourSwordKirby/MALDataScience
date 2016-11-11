@@ -2,22 +2,27 @@ import os
 import json
 import AnimePageFetcher
 import SeasonLinkScraper
-
+import sys
 
 fail_filename_format = "failures_%s.txt"
 
-def grab_data(years, seasons):
+def grab_data(years, seasons=["winter", "fall", "summer", "spring"]):
+    print "Starting MAL scrap session."
     for year in years:
+        print "Starting on Year", year
         group = str(year)
+        directory = "data/" + group
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+
+        error_file_name = fail_filename_format % group
+        error_path = os.path.join(directory, error_file_name)
+        fail_file = open(error_path, 'w')
         for season in seasons:
-            fails = []
-
-            directory = group
-            if not os.path.exists(directory):
-                os.makedirs(directory)
-
+            print "Starting", str(group)+"_"+season 
             animeURLS = SeasonLinkScraper.get_season_anime(year, season)
             AnimePageFetcher.cooldown()
+            print "Got all urls."
             for url in animeURLS:
                 success, dataset = AnimePageFetcher.getAllDataFromUrl(url)
 
@@ -25,7 +30,7 @@ def grab_data(years, seasons):
                     safe_url = url
                     if dataset is not None:
                         safe_url = dataset.get("url", url)
-                    fails.append(safe_url)
+                    fail_file.write(safe_url + "\n")
                     continue
 
                 file_name = str(dataset["id"]) + ".json"
@@ -33,12 +38,9 @@ def grab_data(years, seasons):
                 with open(path_name, 'w') as f:
                     json.dump(dataset, f)
                 AnimePageFetcher.cooldown()
-
-            if len(fails) > 0:
-                error_file_name = fail_filename_format % group
-                error_path = os.path.join(directory, error_file_name)
-                with open(error_path, 'w') as f:
-                    f.write("\n".join(fails))
+            fail_file.flush()
+        fail_file.close()
+        print "Done year", year
 
 def fix_fails(group):
     print "Starting to fix fails for group", group
@@ -73,7 +75,7 @@ def fix_fails(group):
     
     print "Done fixing fails for group", group
 
-years = [2014]#, 2013, 2014, 2015]
-seasons = ["winter", "fall", "summer", "spring"]
-
-grab_data(years, seasons)
+if len(sys.argv) > 1:
+    grab_data([int(i) for i in sys.argv[1:]])
+else:
+    print "Use: python Main.py <year1> <year2>"
