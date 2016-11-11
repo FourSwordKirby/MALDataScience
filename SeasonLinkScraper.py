@@ -2,6 +2,7 @@ import urllib
 import requests
 import re
 import sys
+import time
 from bs4 import BeautifulSoup
 
 def get_html(url, verbose=False):

@@ -52,6 +52,7 @@ def fix_fails(group):
     error_path = os.path.join(directory, error_file_name)
     if not os.path.isfile(error_path):
         print "Expected failure file", error_path, "does not exist."
+        return
     with open(error_path, 'r') as f:
         urls = [l.strip() for l in f.readlines()]
 
@@ -135,4 +136,3 @@ if len(sys.argv) > 1:
     grab_data([int(i) for i in sys.argv[1:]])
 else:
     print "Use: python Main.py <year1> <year2>"
-
