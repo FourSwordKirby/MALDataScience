@@ -53,8 +53,6 @@ def get_html(url, verbose=False):
     if r.status_code != requests.codes.ok:
         if verbose:
             print "[ERROR] request.get returned non-OK status. Got:", r.status_code
-            with open("error_HTTP.log", 'w') as f:
-                f.write(r.text.encode("utf8"))
         return None
     else:
         if verbose:

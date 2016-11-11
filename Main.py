@@ -3,8 +3,6 @@ import json
 import AnimePageFetcher
 import SeasonLinkScraper
 
-years = [2014]#, 2013, 2014, 2015]
-seasons = ["winter", "fall", "summer", "spring"]
 
 fail_filename_format = "failures_%s.txt"
 
@@ -35,7 +33,7 @@ def grab_data(years, seasons):
                 with open(path_name, 'w') as f:
                     json.dump(dataset, f)
                 AnimePageFetcher.cooldown()
-                
+
             if len(fails) > 0:
                 error_file_name = fail_filename_format % group
                 error_path = os.path.join(directory, error_file_name)
@@ -74,3 +72,8 @@ def fix_fails(group):
             f.write("\n".join(fails))
     
     print "Done fixing fails for group", group
+
+years = [2014]#, 2013, 2014, 2015]
+seasons = ["fall", "summer", "spring"]
+
+grab_data(years, seasons)
