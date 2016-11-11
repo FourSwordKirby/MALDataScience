@@ -8,8 +8,8 @@ fail_filename_format = "failures_%s.txt"
 
 def grab_data(years, seasons):
     for year in years:
+        group = str(year)
         for season in seasons:
-            group = str(year)+"_"+season
             fails = []
 
             directory = group
@@ -74,6 +74,6 @@ def fix_fails(group):
     print "Done fixing fails for group", group
 
 years = [2014]#, 2013, 2014, 2015]
-seasons = ["fall", "summer", "spring"]
+seasons = ["winter", "fall", "summer", "spring"]
 
 grab_data(years, seasons)
