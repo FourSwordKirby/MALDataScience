@@ -1,0 +1,66 @@
+---
+title: "midterm_plots"
+output: html_document
+---
+
+```{r}
+library(ggplot2)
+library(ggthemes)
+library(knitr)
+library(MASS)
+
+
+multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
+  library(grid)
+
+  plots <- c(list(...), plotlist)
+
+  numPlots = length(plots)
+
+
+  if (is.null(layout)) {
+    layout <- matrix(seq(1, cols * ceiling(numPlots/cols)),
+                    ncol = cols, nrow = ceiling(numPlots/cols))
+  }
+
+ if (numPlots==1) {
+    print(plots[[1]])
+
+  } else {
+    grid.newpage()
+    pushViewport(viewport(layout = grid.layout(nrow(layout), ncol(layout))))
+
+    for (i in 1:numPlots) {
+      matchidx <- as.data.frame(which(layout == i, arr.ind = TRUE))
+
+      print(plots[[i]], vp = viewport(layout.pos.row = matchidx$row,
+                                      layout.pos.col = matchidx$col))
+    }
+  }
+}
+```
+
+## Example Data
+```{r}
+MAL_data <- read.csv("MALData.csv")
+kable(summary(MAL_data))
+```
+
+```{r echo=FALSE,  warning = FALSE, message = FALSE, fig.width=10, fig.height=5, dpi=150, cache=TRUE, fig.align='center'}
+
+score_density_plot <- ggplot(MAL_data)+
+  geom_density(aes(x = score), color = "black", fill = "blue", alpha = 0.75)+
+  ggtitle("MAL Score Distribution")+
+  xlab("User Score")+
+  ylab("Density")
+  
+
+score_density_plot
+
+```
+
+```{r echo=FALSE,  warning = FALSE, message = FALSE, fig.width=10, fig.height=5, dpi=150, cache=TRUE, fig.align='center'}
+
+pairs(~duration+episodes+favorites+members+popularity+rank+score+score_users,data = MAL_data, main = "MAL Scatterplot Matrix")
+```
+
