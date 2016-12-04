@@ -23,7 +23,7 @@ all_data - dataframe of all json files
 '''
 
 
-def read_files_all(dir = rootdir, write_csv = False, remove_dupl = True):
+def read_files_all(dir = rootdir, write_csv = False, remove_dupl = True, verbose=False):
 	count = 0
 	data_frames = []
 	all_genres, all_producers, all_licensors = get_all_lists(dir)
@@ -36,9 +36,10 @@ def read_files_all(dir = rootdir, write_csv = False, remove_dupl = True):
 				data["genres"] = str(data["genres"])
 				data["producers"] = str(data["producers"])
 				data["licensors"] = str(data["licensors"])
+				data["studios"] = str(data["studios"])
 				#hack to get around arrays of unequal size, I know it's slow
 				#df = pd.DataFrame(dict([ (k,pd.Series(v)) for k,v in data.iteritems() ]))
-				df = pd.DataFrame(data)
+				df = pd.DataFrame(data, index=[0])
 
 				# Genre Duumy Vars 
 				for i in all_genres:
@@ -48,6 +49,7 @@ def read_files_all(dir = rootdir, write_csv = False, remove_dupl = True):
 
 				data_frames.append(df)
 				count += 1
+		if verbose: print "Finished", root
 	assert(len(data_frames) == count)
 	all_data = pd.concat(data_frames)
 
@@ -98,8 +100,9 @@ def get_all_lists(dir = rootdir):
 					if licensors[n] not in all_licensors:
 						all_licensors.append(licensors[n]) 
 
-	# Yea ... I dont want that in the project 					
-	all_genres.remove("hentai")
+	# Yea ... I dont want that in the project 		
+	# SC: We'll remove in the analysis or something.
+	# all_genres.remove("hentai")
 	#print count
 	return (all_genres, all_producers, all_licensors)
 
