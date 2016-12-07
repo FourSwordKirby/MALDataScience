@@ -30,6 +30,12 @@ stats_regex = re.compile(r"<h2>\s*Statistics\s*</h2>")
 # Finds <h2>External Links</h2>
 stats_end_regex = re.compile(r'<div class="clearfix mauto mt16"')
 
+# Finds <h2>Summary Stats</h2>
+stats_summary_regex = re.compile(r"<h2>\s*Summary Stats\s*</h2>")
+
+# Finds <h2>Score Stats</h2>
+stats_score_regex = re.compile(r"<h2>\s*Score Stats\s*</h2>")
+
 favorites_regex = re.compile(r"""<div>\s*<span class="dark_text">\s*Favorites:\s*</span>\s*([\d,]+)\s*</div>""")
 
 
@@ -293,6 +299,43 @@ def scrape_main_page(html, aggregate_data={}):
     getGeneralInformation(html, aggregate_data)
     return aggregate_data
 
+# Returns dictionary with data
+def scrape_stats_page(html, aggregate_data={}):
+    getStatSummary(html, aggregate_data)
+    getStatDistribution(html, aggregate_data)
+    return aggregate_data
+
+def getStatSummary(html, aggregate_dict={}):
+    #soup = BeautifulSoup(html, 'html.parser')
+
+    start_index = stats_summary_regex.search(html).end()
+    end_index = stats_score_regex.search(html).start()
+    subs = html[start_index:end_index]
+    stat_soup = BeautifulSoup(html[start_index:end_index], 'html.parser')
+    field_list = [t.get_text().strip() for t in stat_soup.find_all("div")]
+    for field in field_list[:6]:
+        t = "Users " + str(field.split(':')[0])
+        count = str(field.split(':')[1]).replace(',','')
+        aggregate_dict[t] = int(count)
+    return aggregate_dict
+
+def getStatDistribution(html, aggregate_dict={}):
+    #soup = BeautifulSoup(html, 'html.parser')
+    #TODO
+
+    start_index = stats_score_regex.search(html).end()
+    subs = html[start_index:]
+    #print subs
+    stat_soup = BeautifulSoup(html[start_index:], 'html.parser')
+    table = stat_soup.find("table")
+    field_list = [t.get_text().strip() for t in table.find_all("div")]
+    field_list = field_list
+    print field_list
+    #aggregate_dict["Watching"] = score_users
+    #aggregate_dict[""] = score_value
+
+    return aggregate_dict
+
 
 # Returns pair (success, data)
 # If success if False, then some error occurred and data may be None or corrupted.
@@ -303,7 +346,7 @@ def getAllDataFromUrl(url):
     url = get_safe_url(url)
     data = {}
     data["url"] = url
-
+    # Get main page html
     try:
         html = get_html(url, True)
         retries = 0
@@ -330,6 +373,30 @@ def getAllDataFromUrl(url):
     except Exception as e:
         print "[ERROR] Fetching '", data.get("title", url), "' terminated early. Exception:", e.message
         success = False
+
+   # Get stat html
+    stat_url = url + "/stats"
+    try:
+        html = get_html(stat_url, True)
+        retries = 0
+        while html is None:
+            print "Retrying fetching stats after 5 seconds..."
+            time.sleep(5)
+            html = get_html(url, True)
+            retries += 1
+            if retries >= 3:
+                return (False, data)
+        html = bs_preprocess(html)
+    except:
+        return (False, data)
+
+   # Scrape data from the html of the stats page
+    try:
+        scrape_stats_page(html, data)
+    except Exception as e:
+        print "[ERROR] Fetching '", data.get("title", url), "' stats terminated early. Exception:", e.message
+        success = False
+
     return (success, data)
 
 # Returns the data in the Information section as a dict.
@@ -370,6 +437,7 @@ def extract_stat_section(html):
             field_dict[key] = value
         except:
             print "[ERROR] Cannot split Statistics field. Got:", field
+    
     return field_dict
 
 def parse_info_list(str):
@@ -434,3 +502,6 @@ needed_keys = set([
 
 def validate(data):
     return needed_keys.issubset(set(data.keys()))
+
+#TODO (remove this at the end)
+getAllDataFromUrl("https://myanimelist.net/anime/20583/Haikyuu")
