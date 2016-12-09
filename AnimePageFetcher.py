@@ -159,12 +159,12 @@ def getGeneralInformation(html, aggregate_dict={}):
     #RelatedAnime
     related_table = soup.find_all("table", class_="anime_detail_related_anime")
     if len(related_table) == 0:
-        aggregate_dict["related_titles"] = []
+        aggregate_dict["related_ids"] = []
     else:
         related_entries = [t['href'].strip() for t in related_table[0].find_all("a")]
         related_entries = filter(lambda x: "/anime/" in x, related_entries)
-        related_titles = map(lambda x: x.split("/")[3], related_entries)
-        aggregate_dict["related_titles"] = related_titles
+        related_titles = map(lambda x: int(x.split("/")[2]), related_entries)
+        aggregate_dict["related_ids"] = related_titles
 
     # Statistics/Favorites (we have everything else)
     favorites_match = favorites_regex.search(html)
@@ -326,7 +326,7 @@ def getStatSummary(html, aggregate_dict={}):
     stat_soup = BeautifulSoup(html[start_index:end_index], 'html.parser')
     field_list = [t.get_text().strip() for t in stat_soup.find_all("div")]
     for field in field_list[:6]:
-        t = "Users " + str(field.split(':')[0])
+        t = "users_" + str(field.split(':')[0]).lower().replace(" ", "_").replace("-","")
         count = str(field.split(':')[1]).replace(',','')
         aggregate_dict[t] = int(count)
     return aggregate_dict
@@ -337,20 +337,24 @@ def getStatDistribution(html, aggregate_dict={}):
     start_index = stats_score_regex.search(html).end()
     stat_soup = BeautifulSoup(html[start_index:], 'html.parser')
     table = stat_soup.find("table")
-    field_list = [t.get_text().strip() for t in table.find_all("div")]
-    field_list.reverse()
+    field_list = [t.get_text().strip() for t in table.find_all("tr")]
     field_list = filter(lambda x: "votes" in x, field_list)
     voteSum = 0
-    for i in xrange(len(field_list)):
-        idx = i+1
-        key = "Score " + str(idx) + " votes"
-        start_idx = field_list[i].index("(")+1
-        end_idx = field_list[i].index(" vote")
-        count = field_list[i][start_idx:end_idx]
+    for text in field_list:
+        idx = extract_comma_number(text)
+        key = "score_" + str(idx) + "_votes"
+        start_idx = text.index("(")+1
+        end_idx = text.index(" vote")
+        count = text[start_idx:end_idx]
         aggregate_dict[key] = int(count)
         voteSum += int(count)
     
-    aggregate_dict["Total Votes"] = voteSum
+    # Add in any missing scores
+    for i in xrange(1, 11):
+        if "score_" + str(i) + "_votes" not in aggregate_dict:
+            aggregate_dict["score_" + str(i) + "_votes"] = 0
+    
+    aggregate_dict["score_total_votes"] = voteSum
     #aggregate_dict["Watching"] = score_users
     #aggregate_dict[""] = score_value
 
@@ -493,35 +497,55 @@ def example():
     print("Done")
 
 needed_keys = set([
-    'rating',
-    'studios',
-    'members',
-    'rank',
-    'episodes',
-    'duration',
-    'id',
-    'category',
-    'genres',
-    'title',
-    'source',
-    'score',
-    'type',
-    'status',
-    'broadcast',
-    'favorites',
-    'producers',
-    'licensors',
-    'url',
-    'popularity',
-    'score_users',
-    'premiered',
-    'aired_end',
-    'aired_start',
-    'synopsis'
+    'aired_end', 
+    'aired_start', 
+    'broadcast', 
+    'category', 
+    'duration', 
+    'episodes', 
+    'favorites', 
+    'genres', 
+    'id', 
+    'licensors', 
+    'members', 
+    'popularity', 
+    'premiered', 
+    'producers', 
+    'rank', 
+    'rating', 
+    'related_ids', 
+    'score', 
+    'score_10_votes', 
+    'score_1_votes', 
+    'score_2_votes', 
+    'score_3_votes', 
+    'score_4_votes', 
+    'score_5_votes', 
+    'score_6_votes', 
+    'score_7_votes', 
+    'score_8_votes', 
+    'score_9_votes', 
+    'score_total_votes', 
+    'score_users', 
+    'source', 
+    'status', 
+    'studios', 
+    'synopsis', 
+    'title', 
+    'type', 
+    'url', 
+    'users_completed', 
+    'users_dropped', 
+    'users_onhold', 
+    'users_plan_to_watch', 
+    'users_total', 
+    'users_watching'
 ])
 
 def validate(data):
     return needed_keys.issubset(set(data.keys()))
 
 #TODO Remove this when convenient
-#print getAllDataFromUrl("https://myanimelist.net/anime/10797/Kayoe_Chuugaku")
+# d = getAllDataFromUrl("https://myanimelist.net/anime/10797/Kayoe_Chuugaku")[1]
+# for k in d:
+#     print "{}: {}".format(k, d[k])
