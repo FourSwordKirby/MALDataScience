@@ -157,11 +157,14 @@ def getGeneralInformation(html, aggregate_dict={}):
         aggregate_dict["synopsis"] = synopsis_text
 
     #RelatedAnime
-    related_table = soup.find_all("table", class_="anime_detail_related_anime")[0]
-    related_entries = [t['href'].strip() for t in related_table.find_all("a")]
-    related_entries = filter(lambda x: "/anime/" in x, related_entries)
-    related_titles = map(lambda x: x.split("/")[3], related_entries)
-    aggregate_dict["related_titles"] = related_titles
+    related_table = soup.find_all("table", class_="anime_detail_related_anime")
+    if len(related_table) == 0:
+        aggregate_dict["related_titles"] = []
+    else:
+        related_entries = [t['href'].strip() for t in related_table[0].find_all("a")]
+        related_entries = filter(lambda x: "/anime/" in x, related_entries)
+        related_titles = map(lambda x: x.split("/")[3], related_entries)
+        aggregate_dict["related_titles"] = related_titles
 
     # Statistics/Favorites (we have everything else)
     favorites_match = favorites_regex.search(html)
@@ -399,7 +402,7 @@ def getAllDataFromUrl(url):
         while html is None:
             print "Retrying fetching stats after 5 seconds..."
             time.sleep(5)
-            html = get_html(url, True)
+            html = get_html(stat_url, True)
             retries += 1
             if retries >= 3:
                 return (False, data)
@@ -519,3 +522,6 @@ needed_keys = set([
 
 def validate(data):
     return needed_keys.issubset(set(data.keys()))
+
+#TODO Remove this when convenient
+#print getAllDataFromUrl("https://myanimelist.net/anime/10797/Kayoe_Chuugaku")
