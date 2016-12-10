@@ -131,8 +131,31 @@ def check_missing(year):
         print "Done", str(group)+"_"+season 
     fail_file.close()
 
+def clean_fail_files(group):
+    group = str(group)
+    directory = os.path.join(data_directory, group) 
+    if not os.path.exists(directory):
+        print "Directory for group %s does not exist" % group
+        return
+    dir_list = os.listdir(directory)
+
+    error_file_name = fail_filename_format % group
+    error_path = os.path.join(directory, error_file_name)
+    fail_file = open(error_path, 'r')     # 'r' for reading
+
+    if len(fail_file.read()) == 0:
+        sys.stdout.write("%s is empty. Deleting... " % error_path)
+        fail_file.close()
+        os.remove(error_path)
+        sys.stdout.write("Done.\n")
+        sys.stdout.flush()
+
+
 
 if len(sys.argv) > 1:
     grab_data([int(i) for i in sys.argv[1:]])
 else:
     print "Use: python Main.py <year1> <year2>"
+
+for y in xrange(1998, 2016):
+    clean_fail_files(y)

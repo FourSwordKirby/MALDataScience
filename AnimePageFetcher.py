@@ -162,7 +162,7 @@ def getGeneralInformation(html, aggregate_dict={}):
         aggregate_dict["related_ids"] = []
     else:
         related_entries = [t['href'].strip() for t in related_table[0].find_all("a")]
-        related_entries = filter(lambda x: "/anime/" in x, related_entries)
+        related_entries = filter(lambda x: "/anime/" in x and len(x.split("/")[2]) > 0, related_entries)
         related_titles = map(lambda x: int(x.split("/")[2]), related_entries)
         aggregate_dict["related_ids"] = related_titles
 
