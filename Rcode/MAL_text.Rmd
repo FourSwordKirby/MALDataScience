@@ -1,0 +1,317 @@
+---
+title: "MAL_text"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r}
+library(ggplot2)
+library(wordcloud)
+library(tm)
+library(stringr)
+library(ggthemes)
+```
+
+```{r}
+# Read Data 
+MALdf <- read.csv("MALData.csv")
+```
+
+```{r}
+
+compare.docs = function(str.urls, split="[[:space:]]|[[:punct:]]",
+                        tolower=TRUE, keep.numbers=FALSE, print.summary=TRUE) {
+  dt.mat = get.dt.mat(str.urls, split, tolower, keep.numbers)
+  if (print.summary) print.dt.mat(dt.mat)
+  cor.mat = cor(t(dt.mat))
+  return(list(dt.mat=dt.mat, cor.mat=cor.mat))
+}
+
+get.dt.mat = function(str.urls, split="[[:space:]]|[[:punct:]]",
+                      tolower=TRUE, keep.numbers=FALSE) {
+  wordtabs = get.wordtabs(str.urls, split, tolower, keep.numbers)
+  return(dt.mat.from.wordtabs(wordtabs))
+}
+
+get.wordtabs = function(str.urls, split="[[:space:]]|[[:punct:]]",
+                       tolower=TRUE, keep.numbers=FALSE) {
+  wordtabs = list()
+  for (i in 1:length(str.urls)) {
+    wordtabs[[i]] = get.wordtab(str.urls[i], split, tolower, keep.numbers)
+    k = max(max(gregexpr("/", str.urls[i])[[1]]), 1)
+    names(wordtabs)[i] = substr(str.urls[i], k+1, nchar(str.urls[i]))
+  }
+  return(wordtabs)
+}
+
+get.wordtab = function(lines, split="[[:space:]]|[[:punct:]]",
+                       tolower=TRUE, keep.numbers=FALSE) {
+ # lines = readLines(str.url)
+  text = paste(lines, collapse=" ")
+  words = strsplit(text, split=split)[[1]]
+  words = words[words != ""]
+  if (tolower) words = tolower(words)
+  if (!keep.numbers)
+    words = grep("[0-9]", words, inv=TRUE, val=TRUE)
+  
+  table(words)
+}
+
+dt.mat.from.wordtabs = function(wordtabs) {
+  all.words = c()
+  for (i in 1:length(wordtabs)) {
+    all.words = c(all.words, names(wordtabs[[i]]))
+  }
+  all.words.unique = sort(unique(all.words))
+  dt.mat = matrix(0, length(wordtabs), length(all.words.unique))
+  colnames(dt.mat) = all.words.unique
+  rownames(dt.mat) = names(wordtabs)
+  for (i in 1:length(wordtabs)) {
+    dt.mat[i, names(wordtabs[[i]])] = wordtabs[[i]] 
+  }
+  
+  return(dt.mat)
+}
+
+
+dt.mat.from.wordtab = function(wordtab) {
+  all.words = c()
+  for (i in 1:length(wordtabs)) {
+    all.words = c(all.words, names(wordtabs[[i]]))
+  }
+  all.words.unique = sort(unique(all.words))
+  dt.mat = matrix(0, length(wordtabs), length(all.words.unique))
+  colnames(dt.mat) = all.words.unique
+  rownames(dt.mat) = names(wordtabs)
+  for (i in 1:length(wordtabs)) {
+    dt.mat[i, names(wordtabs[[i]])] = wordtabs[[i]] 
+  }
+  
+  return(dt.mat)
+}
+```
+
+```{r}
+all_genre_df <- c(
+MAL_action <- subset(MALdf, action == 1),
+MAL_adventure <- subset(MALdf, adventure == 1),
+MAL_comedy <- subset(MALdf, comedy == 1),
+MAL_drama <- subset(MALdf, drama == 1),
+MAL_scifi <- subset(MALdf, sci.fi == 1),
+MAL_space <- subset(MALdf, space == 1),
+MAL_martialarts <- subset(MALdf, martial.arts == 1),
+MAL_school <- subset(MALdf, school == 1),
+MAL_shounen <- subset(MALdf, shounen == 1),
+MAL_demons <- subset(MALdf, demons == 1),
+MAL_fantasy <- subset(MALdf, fantasy == 1),
+MAL_magic <- subset(MALdf, magic == 1),
+MAL_superpower <- subset(MALdf, super.power == 1 ),
+MAL_historical <- subset(MALdf, historical == 1),
+MAL_romance <- subset(MALdf, romance == 1),
+MAL_shounenai <- subset(MALdf, shounen.ai == 1),
+MAL_supernatural <- subset(MALdf, supernatural == 1),
+MAL_mecha <- subset(MALdf, mecha == 1),
+MAL_military <- subset(MALdf, military == 1),
+MAL_kids <- subset(MALdf, kids == 1),
+MAL_horror <- subset(MALdf, horror == 1),
+MAL_sports <- subset(MALdf, sports ==1),
+MAL_sliceoflife <- subset(MALdf, slice.of.life == 1),
+MAL_samurai <- subset(MALdf, samurai == 1),
+MAL_harem <- subset(MALdf, harem == 1),
+MAL_shoujo <- subset(MALdf, shoujo == 1),
+MAL_ecchi <- subset(MALdf, ecchi == 1),
+MAL_mystery <- subset(MALdf, mystery == 1),
+MAL_psychological <- subset(MALdf, psychological == 1),
+MAL_parody <- subset(MALdf, parody == 1),
+MAL_hentai <- subset(MALdf, hentai == 1),
+MAL_vampire <- subset(MALdf, vampire == 1),
+MAL_cars <- subset(MALdf, cars == 1),
+MAL_seinen <- subset(MALdf, seinen == 1),
+MAL_police <- subset(MALdf, police == 1),
+MAL_music <- subset(MALdf, music == 1),
+MAL_dementia <- subset(MALdf, dementia== 1),
+MAL_game <- subset(MALdf,game == 1 ),
+MAL_thriller <- subset(MALdf, thriller == 1),
+MAL_yuri <- subset(MALdf, yuri == 1),
+MAL_josei <- subset(MALdf,josei == 1),
+MAL_shoujo.ai <- subset(MALdf, shoujo.ai == 1),
+MAL_yaoi <- subset(MALdf, yaoi == 1),
+MAL_nogenres <- subset(MALdf, no.genres.have.been.added.yet. == 1))
+```
+
+```{r}
+all_texts <- c(
+MAL_action_t<- paste(MAL_action$synopsis, collapse =  " " ),
+MAL_adventure_t <- paste(MAL_adventure$synopsis, collapse =  " " ),
+MAL_cars_t  <- paste(MAL_cars$synopsis, collapse =  " " ),
+MAL_comedy_t <- paste(MAL_comedy$synopsis, collapse =  " "),
+MAL_dementia_t <- paste(MAL_dementia$synopsis, collapse = " "),
+MAL_demons_t <- paste(MAL_demons$synopsis, collapse = " "),
+MAL_drama_t <- paste(MAL_drama$synopsis, collapse = " "), 
+MAL_ecchi_t <- paste(MAL_ecchi$synopsis, collapse = " "), 
+MAL_fantasy_t <- paste(MAL_fantasy$synopsis, collapse = " "),
+MAL_game_t <- paste(MAL_game$synopsis, collapse = " "),
+MAL_harem_t <- paste(MAL_harem$synopsis, collapse = " "), 
+MAL_hentai_t <- paste(MAL_hentai$synopsis, collapse = " "), 
+MAL_historical_t <- paste(MAL_historical$synopsis, collapse = " "), 
+MAL_horror_t <- paste(MAL_horror$synopsis, collapse = " "), 
+MAL_josei_t <- paste(MAL_josei$synopsis, collapse = " "), 
+MAL_kids_t <- paste(MAL_kids$synopsis, collapse = " "), 
+MAL_magic_t <- paste(MAL_magic$synopsis, collapse = " "), 
+MAL_martialarts_t <- paste(MAL_martialarts$synopsis, collapse = " "), 
+MAL_mecha_t <- paste(MAL_mecha$synopsis, collapse = " "),
+MAL_military_t <- paste(MAL_military$synopsis, collapse = " "), 
+MAL_music_t <- paste(MAL_music$synopsis, collapse = " "), 
+MAL_mystery_t <- paste(MAL_mystery$synopsis, collapse = " "), 
+MAL_nogenres_t <- paste(MAL_nogenres$synopsis, collapse = " "), 
+MAL_parody_t <- paste(MAL_parody$synopsis, collapse = " "), 
+MAL_police_t <- paste(MAL_police$synopsis, collapse = " "), 
+MAL_psychological_t <- paste(MAL_psychological$synopsis, collapse = " "), 
+MAL_romance_t <- paste(MAL_romance$synopsis, collapse = " "), 
+MAL_samurai_t <- paste(MAL_samurai$synopsis, collapse = " "), 
+#MAL_school_t <- paste(MAL_school$samurai, collapse = " "), 
+MAL_scifi_t <- paste(MAL_scifi$synopsis, collapse = " "), 
+MAL_seinen_t <- paste(MAL_seinen$synopsis, collapse = " "), 
+MAL_shoujo_t <- paste(MAL_shoujo$synopsis, collapse = " "), 
+MAL_shoujo.ai_t <- paste(MAL_shoujo.ai$synopsis, collapse = " "), 
+MAL_shounen_t <- paste(MAL_shounen$synopsis, collapse = " "), 
+MAL_shounenai_t <- paste(MAL_shounenai$synopsis, collapse = " "), 
+MAL_sliceoflife_t <- paste(MAL_sliceoflife$synopsis, collapse = " "), 
+MAL_space_t <- paste(MAL_space$synopsis, collapse = " "), 
+MAL_supernatural_t <- paste(MAL_supernatural$synopsis, collapse = " "), 
+MAL_superpower_t <- paste(MAL_superpower$synopsis, collapse = " "), 
+MAL_thriller_t <- paste(MAL_thriller$synopsis, collapse = " "), 
+MAL_vampire_t <- paste(MAL_vampire$synopsis, collapse = " "), 
+MAL_yaoi_t <- paste(MAL_yaoi$synopsis, collapse = " "), 
+MAL_yuri_t <- paste(MAL_yuri$synopsis, collapse = " ")
+)
+```
+
+
+```{r}
+genre_list <- c("MAL_action","MAL_adventure","MAL_cars","MAL_comedy","MAL_dementia", "MAL_demons", "MAL_drama", "MAL_ecchi", "MAL_fantasy", "MAL_game", "MAL_harem", "MAL_hentai", "MAL_historical", "MAL_horror", "MAL_josei", "MAL_kids", "MAL_magic", "MAL_martialarts", "MAL_mecha", "MAL_military", "MAL_music", "MAL_mystery", "MAL_nogenres", "MAL_parody", "MAL_police", "MAL_psychological","MAL_romance", "MAL_samurai", "MAL_school", "MAL_scifi", "MAL_seinen", "MAL_shoujo", "MAL_shoujo.ai", "MAL_shounen", "MAL_shounenai", "MAL_sliceoflife", "MAL_space", "MAL_supernatural", "MAL_superpower", "MAL_thriller", "MAL_vampire", "MAL_yaoi", "MAL_yuri")
+```
+
+
+
+```{r}
+cleanTextAll <- paste(MALdf$synopsis, collapse=" ")
+
+textSource <- VectorSource(cleanTextAll)
+textCorpus <- Corpus(textSource)
+textCorpus <- tm_map(textCorpus,content_transformer(tolower))
+textCorpus <- tm_map(textCorpus,stripWhitespace)
+textCorpus <- tm_map(textCorpus,removePunctuation)
+textCorpus <- tm_map(textCorpus,removeNumbers)
+textCorpusStop <- tm_map(textCorpus,removeWords,stopwords("english"))
+
+```
+
+```{r}
+
+dtm_wout_stop <- DocumentTermMatrix(textCorpusStop)
+dtms <- as.data.frame(as.matrix(dtm_wout_stop))
+frequency_stms <- colSums(dtms)
+frequency_stms <- sort(frequency_stms, decreasing=TRUE)
+words <- names(frequency_stms)
+
+```
+
+```{r}
+
+dark2<- brewer.pal(8,"Dark2")
+wordcloud(words,frequency_stms, max.words = 400, rot.per = 0.25, colors = dark2)
+```
+
+# Build Genre Word Clouds 
+```{r}
+#genre_list <- c("MAL_action","MAL_adventure","MAL_cars","MAL_comedy","MAL_dementia", "MAL_demons", "MAL_drama", "MAL_ecchi", "MAL_fantasy", "MAL_game", "MAL_harem", "MAL_hentai", "MAL_historical", "MAL_horror", "MAL_josei", "MAL_kids", "MAL_magic", "MAL_martialarts", "MAL_mecha", "MAL_military", "MAL_music", "MAL_mystery", "MAL_nogenres", "MAL_parody", "MAL_police", "MAL_psychological","MAL_romance", "MAL_samurai", "MAL_school", "MAL_scifi", "MAL_seinen", "MAL_shoujo", "MAL_shoujo.ai", "MAL_shounen", "MAL_shounenai", "MAL_sliceoflife", "MAL_space", "MAL_supernatural", "MAL_superpower", "MAL_thriller", "MAL_vampire", "MAL_yaoi", "MAL_yuri")
+genre_list <- c("MAL_action","MAL_adventure","MAL_cars","MAL_comedy","MAL_dementia", "MAL_demons", "MAL_drama", "MAL_ecchi", "MAL_fantasy", "MAL_game", "MAL_harem", "MAL_hentai", "MAL_historical", "MAL_horror", "MAL_josei", "MAL_kids", "MAL_magic", "MAL_martialarts", "MAL_mecha", "MAL_military", "MAL_music", "MAL_mystery", "MAL_nogenres", "MAL_parody", "MAL_police", "MAL_psychological","MAL_romance", "MAL_samurai", "MAL_scifi", "MAL_seinen", "MAL_shoujo", "MAL_shoujo.ai", "MAL_shounen", "MAL_shounenai", "MAL_sliceoflife", "MAL_space", "MAL_supernatural", "MAL_superpower", "MAL_thriller", "MAL_vampire", "MAL_yaoi", "MAL_yuri")
+
+build_dtm <- function(str){
+  #browser()
+  textSource <- VectorSource(str)
+  textCorpus <- Corpus(textSource)
+  textCorpus <- tm_map(textCorpus,content_transformer(tolower))
+  textCorpus <- tm_map(textCorpus,stripWhitespace)
+  textCorpus <- tm_map(textCorpus,removePunctuation)
+  textCorpus <- tm_map(textCorpus,removeNumbers)
+  textCorpus <- tm_map(textCorpus,removeWords,stopwords("english"))
+  dtm  <- DocumentTermMatrix(textCorpus)
+  dtm_df<-as.data.frame(as.matrix(dtm))
+ # dtm_df <- as.data.frame(dtm)
+  frequency_stms <- colSums(dtm_df)
+  frequency_stms <- sort(frequency_stms, decreasing=TRUE)
+  words <- names(frequency_stms)
+  return(c(dtm_df,frequency_stms,words))
+}
+
+build_wordclouds <- function(list_str, nwords = 150){
+  dark2<- brewer.pal(8,"Dark2")
+   #browser()
+  for (i in 1:length(list_str)){
+    str <- list_str[[i]]
+    textSource <- VectorSource(str)
+    textCorpus <- Corpus(textSource)
+    textCorpus <- tm_map(textCorpus,content_transformer(tolower))
+    textCorpus <- tm_map(textCorpus,stripWhitespace)
+    textCorpus <- tm_map(textCorpus,removePunctuation)
+    textCorpus <- tm_map(textCorpus,removeNumbers)
+    textCorpus <- tm_map(textCorpus,removeWords,stopwords("english"))
+    textCorpus <- tm_map(textCorpus,removeWords,c("source", "anidb", "ann", "mal"))
+    dtm  <- DocumentTermMatrix(textCorpus, control = list(wordLengths=c(0,Inf) ))
+    dtm_df<-as.data.frame(as.matrix(dtm))
+  # dtm_df <- as.data.frame(dtm)
+    frequency_stms <- colSums(dtm_df)
+    frequency_stms <- sort(frequency_stms, decreasing=TRUE)
+    words <- names(frequency_stms)
+
+    png(paste(genre_list[i], ".png"), width=800, height=800, res=200)
+    wordcloud(words,frequency_stms, max.words = nwords, rot.per = 0.25, colors = dark2 )
+    dev.off()
+  }
+}
+```
+
+```{r}
+build_wordclouds(all_texts)
+```
+
+
+
+## PLESE IGNORE
+
+```{r}
+bee_movie <- readLines("http://www.script-o-rama.com/movie_scripts/a1/bee-movie-script-transcript-seinfeld.html")
+bee_movie_lines <- paste(bee_movie, collapse = " " )
+textSource <- VectorSource(bee_movie_lines)
+textCorpus <- Corpus(textSource)
+textCorpus <- tm_map(textCorpus,content_transformer(tolower))
+textCorpus <- tm_map(textCorpus,stripWhitespace)
+textCorpus <- tm_map(textCorpus,removePunctuation)
+textCorpus <- tm_map(textCorpus,removeNumbers)
+textCorpus <- tm_map(textCorpus,removeWords,stopwords("english"))
+dtm  <- DocumentTermMatrix(textCorpus)
+dtm_df<-as.data.frame(as.matrix(dtm))
+# dtm_df <- as.data.frame(dtm)
+frequency_stms <- colSums(dtm_df)
+frequency_stms <- sort(frequency_stms, decreasing=TRUE)
+words <- names(frequency_stms)
+
+
+```
+
+```{r}
+dark2<- brewer.pal(8,"Dark2")
+wordcloud(words,frequency_stms, max.words = 200, rot.per = 0.25, colors = dark2)
+```
+
