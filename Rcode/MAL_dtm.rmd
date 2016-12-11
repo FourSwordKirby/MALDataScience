@@ -1,0 +1,69 @@
+---
+title: "MAL_dtm"
+output: html_document
+---
+
+```{r}
+library(ggplot2)
+library(wordcloud)
+library(tm)
+library(stringr)
+library(ggthemes)
+library(cluster)
+library(dendextend)
+ library(SnowballC) 
+```
+
+```{r}
+# Read Data 
+#MALdf <- read.csv("MALData.csv")
+```
+
+```{r}
+path_n <- "raw_text"
+docs <- Corpus(DirSource(path_n))
+summary(docs)
+```
+
+
+```{r}
+docs <- tm_map(docs, tolower) 
+docs <- tm_map(docs, removePunctuation)   
+docs <- tm_map(docs, removeNumbers)
+docs <- tm_map(docs, removeWords, stopwords("english"))   
+docs <- tm_map(docs, removeWords,c("source", "anidb", "ann", "mal", "written")) 
+docs <- tm_map(docs, stemDocument)   
+docs <- tm_map(docs, PlainTextDocument)  
+
+
+```
+
+```{r}
+dtm <- DocumentTermMatrix(docs) ; dtm
+```
+
+```{r}
+dtms <- removeSparseTerms(dtm, 0.1) 
+inspect(dtms)  
+```
+
+```{r}
+freq <- sort(colSums(as.matrix(dtm)), decreasing=TRUE)  
+wf <- data.frame(word=names(freq), freq=freq)   
+head(wf)  
+```
+
+```{r}
+head(freq,20)
+```
+
+
+```{r}
+topWords <- c("one", "world", "will", "new", "school", "life", "however","girl", "friends", "two", "day", "now", "series", "can", "story","young", "time", "first", "years", "mysterious")
+
+
+findAssocs(dtms, c("girl", "power","love","likes","school", "boy"), corlimit=0.90)
+
+findAssocs(dtms, topWords, corlimit = 0.98)
+```
+
