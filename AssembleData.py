@@ -30,6 +30,9 @@ def read_files_all(dir = rootdir, write_csv = False, remove_dupl = True, verbose
 	for root, dirs, files in os.walk(dir):
 		for name in files:
 			with open(os.path.join(root, name)) as json_data:
+				if(".json" not in name):
+					print name
+					continue
 				data = json.load(json_data)
 
 				temp_genre_list = [x.lower() for x in data["genres"]]
@@ -37,6 +40,7 @@ def read_files_all(dir = rootdir, write_csv = False, remove_dupl = True, verbose
 				data["producers"] = str(data["producers"])
 				data["licensors"] = str(data["licensors"])
 				data["studios"] = str(data["studios"])
+				data["related_ids"] = str(data["related_ids"])
 				#hack to get around arrays of unequal size, I know it's slow
 				#df = pd.DataFrame(dict([ (k,pd.Series(v)) for k,v in data.iteritems() ]))
 				df = pd.DataFrame(data, index=[0])
@@ -84,6 +88,9 @@ def get_all_lists(dir = rootdir):
 	for root, dirs, files in os.walk(dir):
 		for name in files:
 			with open(os.path.join(root, name)) as json_data:
+				if(".json" not in name):
+					print name
+					continue
 				data = json.load(json_data)
 				genres = [x.lower() for x in data["genres"]]
 				producers = [x.lower() for x in data["producers"]]
