@@ -21,6 +21,7 @@ library(stringr)
 library(ggthemes)
 library(cluster)
 library(dendextend)
+ library(SnowballC) 
 ```
 
 ```{r}
@@ -204,13 +205,63 @@ for( i in 1:length(all_texts)){
   write(all_texts[[i]], file = paste(genre_list[i], ".txt"))
 }
 ```
+```{r}
+
+```
+
+## Load everything 
 
 
 ```{r}
-docs <- Corpus(all_texts)
+path_n <- "raw_text"
+docs <- Corpus(DirSource(path_n))
 summary(docs)
 ```
 
+
+```{r}
+docs <- tm_map(docs, tolower) 
+docs <- tm_map(docs, removePunctuation)   
+docs <- tm_map(docs, removeNumbers)
+docs <- tm_map(docs, removeWords, stopwords("english"))   
+docs <- tm_map(docs, removeWords,c("source", "anidb", "ann", "mal")) 
+docs <- tm_map(docs, stemDocument)   
+docs <- tm_map(docs, PlainTextDocument)  
+
+
+```
+
+```{r}
+dtm <- DocumentTermMatrix(docs) ; dtm
+```
+
+```{r}
+dtms <- removeSparseTerms(dtm, 0.1) 
+inspect(dtms)  
+```
+
+```{r}
+freq <- sort(colSums(as.matrix(dtm)), decreasing=TRUE)  
+wf <- data.frame(word=names(freq), freq=freq)   
+head(wf)  
+```
+
+```{r}
+
+```
+
+
+```{r}
+findAssocs(dtms, c("girl", "power","love","likes","school", "boy"), corlimit=0.90)
+```
+
+
+```{r}
+library(cluster)   
+d <- dist(t(dtmss), method="euclidian")   
+fit <- hclust(d=d, method="ward")   
+fit   
+```
 
 
 ```{r}
