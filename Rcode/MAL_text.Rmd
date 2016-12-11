@@ -198,6 +198,20 @@ MAL_yuri_t <- paste(MAL_yuri$synopsis, collapse = " ")
 )
 ```
 
+```{r}
+genre_list <- c("MAL_action","MAL_adventure","MAL_cars","MAL_comedy","MAL_dementia", "MAL_demons", "MAL_drama", "MAL_ecchi", "MAL_fantasy", "MAL_game", "MAL_harem", "MAL_historical", "MAL_horror", "MAL_josei", "MAL_kids", "MAL_magic", "MAL_martialarts", "MAL_mecha", "MAL_military", "MAL_music", "MAL_mystery", "MAL_nogenres", "MAL_parody", "MAL_police", "MAL_psychological","MAL_romance", "MAL_samurai", "MAL_school", "MAL_scifi", "MAL_seinen", "MAL_shoujo", "MAL_shoujo.ai", "MAL_shounen", "MAL_shounenai", "MAL_sliceoflife", "MAL_space", "MAL_supernatural", "MAL_superpower", "MAL_thriller", "MAL_vampire", "MAL_yaoi", "MAL_yuri")
+for( i in 1:length(all_texts)){
+  write(all_texts[[i]], file = paste(genre_list[i], ".txt"))
+}
+```
+
+
+```{r}
+docs <- Corpus(all_texts)
+summary(docs)
+```
+
+
 
 ```{r}
 genre_list <- c("MAL_action","MAL_adventure","MAL_cars","MAL_comedy","MAL_dementia", "MAL_demons", "MAL_drama", "MAL_ecchi", "MAL_fantasy", "MAL_game", "MAL_harem", "MAL_historical", "MAL_horror", "MAL_josei", "MAL_kids", "MAL_magic", "MAL_martialarts", "MAL_mecha", "MAL_military", "MAL_music", "MAL_mystery", "MAL_nogenres", "MAL_parody", "MAL_police", "MAL_psychological","MAL_romance", "MAL_samurai", "MAL_school", "MAL_scifi", "MAL_seinen", "MAL_shoujo", "MAL_shoujo.ai", "MAL_shounen", "MAL_shounenai", "MAL_sliceoflife", "MAL_space", "MAL_supernatural", "MAL_superpower", "MAL_thriller", "MAL_vampire", "MAL_yaoi", "MAL_yuri")
@@ -349,6 +363,9 @@ MAL_comedy_t <- paste(MAL_comedy$synopsis, collapse =  " ")
 
 ```
 
+
+
+
 ```{r}
 cleanTextAll <- paste(MALdf$synopsis, collapse=" ")
 shounen_text <- paste(MAL_shounen$synopsis, collapse = " ")
@@ -364,11 +381,16 @@ textCorpusStop <- tm_map(textCorpus,removeWords,stopwords("english"))
 
 ```
 
+
+
 ```{r}
 textCorpusStop <- tm_map(textCorpusStop,removeWords,c("source", "anidb", "ann", "mal"))
 dtm  <- DocumentTermMatrix(textCorpusStop)
 
 ```
+
+
+
 
 ```{r}
 dtm_rem_s <- removeSparseTerms(dtm, 0.01)
