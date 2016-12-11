@@ -354,7 +354,7 @@ cleanTextAll <- paste(MALdf$synopsis, collapse=" ")
 shounen_text <- paste(MAL_shounen$synopsis, collapse = " ")
 romacne_text <- paste(MAL_romance$synopsis, collapse = " ")
 
-textSource <- VectorSource(romacne_text)
+textSource <- VectorSource(shounen_text)
 textCorpus <- Corpus(textSource)
 textCorpus <- tm_map(textCorpus,content_transformer(tolower))
 textCorpus <- tm_map(textCorpus,stripWhitespace)
@@ -371,7 +371,8 @@ dtm  <- DocumentTermMatrix(textCorpusStop)
 ```
 
 ```{r}
-reduced <- dtm[ sample(1:nrow(dtm), nrow(dtm)/10 ) , ]
+dtm_rem_s <- removeSparseTerms(dtm, 0.01)
+inspect(dtm_rem_s)
 ```
 
 
@@ -380,7 +381,7 @@ reduced <- dtm[ sample(1:nrow(dtm), nrow(dtm)/10 ) , ]
 #https://rstudio-pubs-static.s3.amazonaws.com/31867_8236987cf0a8444e962ccd2aec46d9c3.html
 
 # remove sparce 
-dtm_rem_s <- removeSparseTerms(dtm, 0.10)
+
 d <- dist(t(dtm_rem_s), method="euclidian")
 fit <- hclust(d=d, method="ward")   
 plot.new()
@@ -402,9 +403,9 @@ library(cluster)
 
 
 ```{r}
-dtm_rem_s <- removeSparseTerms(dtm, 0.10)
+dtm_rem_s <- removeSparseTerms(dtm, 0.15)
 d <- dist(t(dtm_rem_s), method="euclidian")
-kfit <- kmeans(d, 10)   
+kfit <- kmeans(d, 2)   
 clusplot(as.matrix(d), kfit$cluster, color=T, shade=T, labels=2, lines=0)  
 ```
 
@@ -433,5 +434,17 @@ words <- names(frequency_stms)
 ```{r}
 dark2<- brewer.pal(8,"Dark2")
 wordcloud(words,frequency_stms, max.words = 200, rot.per = 0.25, colors = dark2)
+```
+
+
+```{r}
+d <- dist(t(dtm), method="euclidian")
+fit <- hclust(d=d, method = "complete")
+dend <- as.dendrogram(fit)
+dend <- rotate(dend, 1:150)
+dend <- color_branches(dend, k=3)
+dend <- hang.dendrogram(dend,hang_height=0.1)
+dend <- set(dend, "labels_cex", 0.25)
+plot(dend,  horiz =  TRUE,  nodePar = list(cex = .007))
 ```
 
