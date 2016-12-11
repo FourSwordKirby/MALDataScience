@@ -132,7 +132,7 @@ MAL_ecchi <- subset(MALdf, ecchi == 1),
 MAL_mystery <- subset(MALdf, mystery == 1),
 MAL_psychological <- subset(MALdf, psychological == 1),
 MAL_parody <- subset(MALdf, parody == 1),
-MAL_hentai <- subset(MALdf, hentai == 1),
+
 MAL_vampire <- subset(MALdf, vampire == 1),
 MAL_cars <- subset(MALdf, cars == 1),
 MAL_seinen <- subset(MALdf, seinen == 1),
@@ -161,7 +161,7 @@ MAL_ecchi_t <- paste(MAL_ecchi$synopsis, collapse = " "),
 MAL_fantasy_t <- paste(MAL_fantasy$synopsis, collapse = " "),
 MAL_game_t <- paste(MAL_game$synopsis, collapse = " "),
 MAL_harem_t <- paste(MAL_harem$synopsis, collapse = " "), 
-MAL_hentai_t <- paste(MAL_hentai$synopsis, collapse = " "), 
+
 MAL_historical_t <- paste(MAL_historical$synopsis, collapse = " "), 
 MAL_horror_t <- paste(MAL_horror$synopsis, collapse = " "), 
 MAL_josei_t <- paste(MAL_josei$synopsis, collapse = " "), 
@@ -198,7 +198,7 @@ MAL_yuri_t <- paste(MAL_yuri$synopsis, collapse = " ")
 
 
 ```{r}
-genre_list <- c("MAL_action","MAL_adventure","MAL_cars","MAL_comedy","MAL_dementia", "MAL_demons", "MAL_drama", "MAL_ecchi", "MAL_fantasy", "MAL_game", "MAL_harem", "MAL_hentai", "MAL_historical", "MAL_horror", "MAL_josei", "MAL_kids", "MAL_magic", "MAL_martialarts", "MAL_mecha", "MAL_military", "MAL_music", "MAL_mystery", "MAL_nogenres", "MAL_parody", "MAL_police", "MAL_psychological","MAL_romance", "MAL_samurai", "MAL_school", "MAL_scifi", "MAL_seinen", "MAL_shoujo", "MAL_shoujo.ai", "MAL_shounen", "MAL_shounenai", "MAL_sliceoflife", "MAL_space", "MAL_supernatural", "MAL_superpower", "MAL_thriller", "MAL_vampire", "MAL_yaoi", "MAL_yuri")
+genre_list <- c("MAL_action","MAL_adventure","MAL_cars","MAL_comedy","MAL_dementia", "MAL_demons", "MAL_drama", "MAL_ecchi", "MAL_fantasy", "MAL_game", "MAL_harem", "MAL_historical", "MAL_horror", "MAL_josei", "MAL_kids", "MAL_magic", "MAL_martialarts", "MAL_mecha", "MAL_military", "MAL_music", "MAL_mystery", "MAL_nogenres", "MAL_parody", "MAL_police", "MAL_psychological","MAL_romance", "MAL_samurai", "MAL_school", "MAL_scifi", "MAL_seinen", "MAL_shoujo", "MAL_shoujo.ai", "MAL_shounen", "MAL_shounenai", "MAL_sliceoflife", "MAL_space", "MAL_supernatural", "MAL_superpower", "MAL_thriller", "MAL_vampire", "MAL_yaoi", "MAL_yuri")
 ```
 
 
@@ -217,7 +217,7 @@ textCorpusStop <- tm_map(textCorpus,removeWords,stopwords("english"))
 ```
 
 ```{r}
-
+textCorpusStop <- tm_map(textCorpusStop,removeWords,c("source", "anidb", "ann", "mal"))
 dtm_wout_stop <- DocumentTermMatrix(textCorpusStop)
 dtms <- as.data.frame(as.matrix(dtm_wout_stop))
 frequency_stms <- colSums(dtms)
@@ -234,7 +234,7 @@ wordcloud(words,frequency_stms, max.words = 400, rot.per = 0.25, colors = dark2)
 
 # Build Genre Word Clouds 
 ```{r}
-#genre_list <- c("MAL_action","MAL_adventure","MAL_cars","MAL_comedy","MAL_dementia", "MAL_demons", "MAL_drama", "MAL_ecchi", "MAL_fantasy", "MAL_game", "MAL_harem", "MAL_hentai", "MAL_historical", "MAL_horror", "MAL_josei", "MAL_kids", "MAL_magic", "MAL_martialarts", "MAL_mecha", "MAL_military", "MAL_music", "MAL_mystery", "MAL_nogenres", "MAL_parody", "MAL_police", "MAL_psychological","MAL_romance", "MAL_samurai", "MAL_school", "MAL_scifi", "MAL_seinen", "MAL_shoujo", "MAL_shoujo.ai", "MAL_shounen", "MAL_shounenai", "MAL_sliceoflife", "MAL_space", "MAL_supernatural", "MAL_superpower", "MAL_thriller", "MAL_vampire", "MAL_yaoi", "MAL_yuri")
+
 genre_list <- c("MAL_action","MAL_adventure","MAL_cars","MAL_comedy","MAL_dementia", "MAL_demons", "MAL_drama", "MAL_ecchi", "MAL_fantasy", "MAL_game", "MAL_harem", "MAL_hentai", "MAL_historical", "MAL_horror", "MAL_josei", "MAL_kids", "MAL_magic", "MAL_martialarts", "MAL_mecha", "MAL_military", "MAL_music", "MAL_mystery", "MAL_nogenres", "MAL_parody", "MAL_police", "MAL_psychological","MAL_romance", "MAL_samurai", "MAL_scifi", "MAL_seinen", "MAL_shoujo", "MAL_shoujo.ai", "MAL_shounen", "MAL_shounenai", "MAL_sliceoflife", "MAL_space", "MAL_supernatural", "MAL_superpower", "MAL_thriller", "MAL_vampire", "MAL_yaoi", "MAL_yuri")
 
 build_dtm <- function(str){
